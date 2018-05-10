@@ -344,6 +344,32 @@ int decryptAES(const unsigned char* key, const unsigned char* in, unsigned char 
    return 0;
 }
 
+int encryptAESECB(const unsigned char * key, const unsigned char * buffer, int inputLength, unsigned char **output) {
+   int paddedLength = inputLength + (16 - (inputLength % 16));
+   unsigned char *out = (unsigned char*) malloc(sizeof(char)*paddedLength);
+   unsigned char paddedInput[paddedLength];
+   memcpy(paddedInput, buffer, inputLength);
+
+   int nBlocks = inputLength/16 + 1;
+   padBlock((char*)paddedInput + ((nBlocks-1)*16), 16, inputLength % 16);
+   for (int i = 0; i < nBlocks; i++) {
+      encryptAES(key, paddedInput+ (i*16), out+(i*16));
+   }
+   *output = out;
+   return paddedLength;
+}
+int decryptAESECB(const unsigned char * key, const unsigned char * buffer, int inputLength, unsigned char **output) {
+   unsigned char *out = (unsigned char*) malloc(sizeof(char)*inputLength);
+
+   int nBlocks = inputLength / 16;
+
+   for ( int i =0; i < nBlocks; i++) {
+      decryptAES(key, buffer + i*16, out + (i*16));
+   }
+   *output = out;
+   return inputLength;
+}
+
 int encryptAESCBC(const unsigned char * key, const unsigned char* iv, const unsigned char * buffer, int inputLength, unsigned char **output) {
    int paddedLength = inputLength + (16 - (inputLength % 16));
    unsigned char *out = (unsigned char*) malloc(sizeof(char)*paddedLength);
@@ -359,7 +385,7 @@ int encryptAESCBC(const unsigned char * key, const unsigned char* iv, const unsi
       for (int j = 0; j < 16; j++) {
          out[i*16+j] = buffer[i*16+j] ^ lastBlock[j];
       }
-      encryptAES(key, paddedInput+ (i*16), lastBlock);
+      encryptAES(key, out+ (i*16), lastBlock);
       memcpy(out + (i*16), lastBlock, 16);
    }
    *output = out;
