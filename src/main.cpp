@@ -46,8 +46,19 @@ int main(int argc, char** argv) {
    printBinHex(result, len);
 
    free(result);
-
    breakECBoracle(oracle, (unsigned char*)s.c_str(), (int) s.size());
+
+   int l = oracle.encryptCBCcomment("moo;admin=true;", 16, &result);
+
+   char * dec;
+   l = oracle.decryptCBC(result, l, &dec);
+   printf("%s\n", dec);
+   if (validPadding((unsigned char*)dec, l)) {
+      printf("good padding\n");
+   }
+
+   free(result);
+   free(dec);
 
    return 0;
 }

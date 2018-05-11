@@ -70,21 +70,30 @@ std::vector<std::pair<std::string, std::string>> parseToken(const string & token
    return pairs;
 }
 
-string profile_for(const string &email) {
+string escape(const string & input) {
    stringstream ss;
-   ss << "email=";
-   for (size_t i =0; i < email.size(); i++) {
-      switch(email.at(i)) {
+   for (size_t i =0; i < input.size(); i++) {
+      switch(input.at(i)) {
          case '=':
             ss << "\%3D";
             break;
          case '&':
             ss << "%26";
             break;
+         case ';':
+            ss << "%3B";
+            break;
          default:
-            ss << email.at(i);
+            ss << input.at(i);
       }
    }
+   return ss.str();
+}
+
+string profile_for(const string &email) {
+   stringstream ss;
+   ss << "email=";
+   ss << escape(email);
    ss << "&role=user&uid=10";
    return ss.str();
 }

@@ -1,4 +1,5 @@
 #include "aes.h"
+#include "utils.h"
 #include "encOracle.h"
 #include "b64.h"
 #include "detectECB.h"
@@ -6,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <string>
 
 char * fuzzInput(const char *input, int length, int *newLen) {
    int front = 5 + (rand() % 5);
@@ -59,6 +61,22 @@ int encryptionOracle::encryptRandom(const char* input, int len, char** output) {
    return length;
 }
 
+int encryptionOracle::encryptCBCcomment(const char* input, int len, char** output) {
+   const char * prefix = "comment1=cooking%20MCs;userdata=";
+   const char * suffix = ";comment2=%20like%20a%20pound%20of%20bacon";
+   std::string value = escape(input);
+
+   char fullMessage[strlen(prefix) + strlen(suffix) + value.size()];
+   memcpy(fullMessage, prefix, strlen(prefix));
+   memcpy(fullMessage+ strlen(prefix), value.c_str() , value.size());
+   memcpy(fullMessage+ strlen(prefix) + value.size(), suffix, strlen(suffix));
+
+   return encryptAESCBC((unsigned char*) m_key, (unsigned char*)m_iv, (unsigned char*)fullMessage, sizeof(fullMessage), (unsigned char**)output);
+}
+
+int encryptionOracle::decryptCBC(const char* input, int len, char** output) {
+   return decryptAESCBC((unsigned char*) m_key, (unsigned char*)m_iv, (unsigned char*)input, len, (unsigned char**)output);
+}
 
 int encryptionOracleStandalone(char* input, int len, char** output) {
    encryptionOracle oracle;
