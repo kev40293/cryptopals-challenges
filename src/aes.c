@@ -375,6 +375,7 @@ int encryptAESCBC(const unsigned char * key, const unsigned char* iv, const unsi
    unsigned char *out = (unsigned char*) malloc(sizeof(char)*paddedLength);
    unsigned char paddedInput[paddedLength];
    memcpy(paddedInput, buffer, inputLength);
+   memset(paddedInput+inputLength, paddedLength-inputLength, paddedLength-inputLength);
 
    unsigned char lastBlock[16];
    memcpy(lastBlock, iv, 16);
@@ -383,7 +384,7 @@ int encryptAESCBC(const unsigned char * key, const unsigned char* iv, const unsi
    padBlock((char*)paddedInput + ((nBlocks-1)*16), 16, inputLength % 16);
    for (int i = 0; i < nBlocks; i++) {
       for (int j = 0; j < 16; j++) {
-         out[i*16+j] = buffer[i*16+j] ^ lastBlock[j];
+         out[i*16+j] = paddedInput[i*16+j] ^ lastBlock[j];
       }
       encryptAES(key, out+ (i*16), lastBlock);
       memcpy(out + (i*16), lastBlock, 16);

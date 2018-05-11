@@ -2,6 +2,7 @@
 .SUFFIXES:.o.c
 
 CFLAGS=-std=c++14 -g -Iinclude
+#CFLAGS=-std=c++14 -g -Iinclude -fsanitize=address
 
 default: all
 

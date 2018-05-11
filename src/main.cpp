@@ -23,6 +23,7 @@ int main(int argc, char** argv) {
    unsigned char* key = (unsigned char*) "YELLOW SUBMARINE";
    decryptFileCBC(key, iv, argv[1]);
    */
+   srand(time(0));
 
    auto s = profile_for("foo@bar.com");
    cout << s << endl;
@@ -38,9 +39,15 @@ int main(int argc, char** argv) {
    memset(iv, 10, 16);
 
    char * result;
-   int len = encryptAESCBC(key, iv, (const unsigned char*) s.c_str(), (int) s.size(), (unsigned char**) &result);
+
+   encryptionOracle oracle;
+   int len = oracle.encryptECBprefixed(s.c_str(), (int)s.size(), &result);
 
    printBinHex(result, len);
+
+   free(result);
+
+   breakECBoracle(oracle, (unsigned char*)s.c_str(), (int) s.size());
 
    return 0;
 }

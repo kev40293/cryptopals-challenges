@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <time.h>
 
-char * fuzzInput(char *input, int length, int *newLen) {
+char * fuzzInput(const char *input, int length, int *newLen) {
    int front = 5 + (rand() % 5);
    int back = 5 + (rand() % 5);
    *newLen = length + front + back;
@@ -15,14 +15,31 @@ char * fuzzInput(char *input, int length, int *newLen) {
    memcpy(newInput+front, input, length);
    return newInput;
 }
-
-int encryptionOracle::encryptECB(char * input, int len, char** output ) {
-   int newLen;
-   char* fuzzedInput = fuzzInput(input, len, &newLen);
-   return encryptAESCBC((unsigned char*) m_key, (unsigned char*) m_iv, (unsigned char*)fuzzedInput, newLen, (unsigned char**) output);
+char * encryptionOracle::prefixInput(const char *input, int length, int *newLen) {
+   *newLen = length + m_prefixLen;
+   char * newInput = new char[*newLen];
+   memcpy(newInput, m_prefix, m_prefixLen);
+   memcpy(newInput+m_prefixLen, input, length);
+   return newInput;
 }
 
-int encryptionOracle::encryptRandom(char* input, int len, char** output) {
+int encryptionOracle::encryptECBfuzzed(const char * input, int len, char** output ) {
+   int newLen;
+   char* fuzzedInput = fuzzInput(input, len, &newLen);
+   int length = encryptAESECB((unsigned char*) m_key, (unsigned char*)fuzzedInput, newLen, (unsigned char**) output);
+   free(fuzzedInput);
+   return length;
+}
+
+int encryptionOracle::encryptECBprefixed(const char * input, int len, char** output ) {
+   int newLen = 0;
+   char* prefixedInput = prefixInput(input, len, &newLen);
+   int length = encryptAESECB((unsigned char*) m_key, (unsigned char*)prefixedInput, newLen, (unsigned char**) output);
+   delete [] prefixedInput;
+   return length;
+}
+
+int encryptionOracle::encryptRandom(const char* input, int len, char** output) {
    int r = rand();
    int alg = r % 2;
 
