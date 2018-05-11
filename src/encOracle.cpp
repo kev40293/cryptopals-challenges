@@ -101,3 +101,36 @@ void testECBCBC(int tries) {
       free (out);
    }
 }
+
+void cbcBitflip() {
+   encryptionOracle oracle;
+   char * result;
+
+   char * moo = strdup(";admin=true");
+   moo[0] ^= 1;
+   moo[6] ^= 1;
+
+   int l = oracle.encryptCBCcomment(moo, strlen(moo), &result);
+   free(moo);
+   int offset = strlen("comment1=cooking%20MCs;userdata=");
+   result[offset-16] ^= 1;
+   result[offset-16+6] ^= 1;
+
+   char * dec;
+   l = oracle.decryptCBC(result, l, &dec);
+   if (validPadding((unsigned char*)dec, l)) {
+      char x = dec[l-1];
+      dec[l-x] = '\0';
+   }
+   printf("%s\n", dec);
+
+   if (validToken(dec)) {
+      printf("I'm in\n");
+   }
+   else {
+      printf("Not yet\n");
+   }
+
+   free(result);
+   free(dec);
+}

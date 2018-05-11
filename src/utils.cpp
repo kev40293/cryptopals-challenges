@@ -50,15 +50,15 @@ char * base64readFile(const char * filename, int *totalSize) {
    return data;
 }
 
-std::vector<std::pair<std::string, std::string>> parseToken(const string & token) {
+std::vector<std::pair<std::string, std::string>> parseToken(const string & token, const char * delim) {
    vector<pair<string, string>> pairs;
 
    vector<string> tokens;
    char* dup = strdup(token.c_str());
-   char * tok = std::strtok(dup, "&");
+   char * tok = std::strtok(dup, delim);
    while (tok != NULL) {
       tokens.push_back(tok);
-      tok = std::strtok(NULL, "&");
+      tok = std::strtok(NULL, delim);
    }
    free(dup);
 
@@ -96,4 +96,12 @@ string profile_for(const string &email) {
    ss << escape(email);
    ss << "&role=user&uid=10";
    return ss.str();
+}
+
+bool validToken(const string & token) {
+   auto keys = parseToken(token, ";");
+   for (auto kb : keys) {
+      if (kb.first.compare("admin") == 0 && kb.second.compare("true") == 0) return true;
+   }
+   return false;
 }

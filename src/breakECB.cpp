@@ -115,6 +115,7 @@ void breakECBbytes(encryptionOracle & oracle, unsigned char *message, int mLen, 
 
    char decMessage[tBufLen+mLen]; // Revealed message
    memcpy(decMessage, tBuf, tBufLen); // Set our known values
+   memset(decMessage + tBufLen, 0, mLen);
 
    char realMessage[tBufLen+mLen];
    memcpy(realMessage, tBuf, tBufLen);
@@ -127,7 +128,7 @@ void breakECBbytes(encryptionOracle & oracle, unsigned char *message, int mLen, 
          char* encGuess;
          char* encReal;
 
-         int gLen = oracle.encryptECBprefixed(decMessage + 1 + mPos, mLen+tBufLen - mPos, &encGuess);
+         int gLen = oracle.encryptECBprefixed(decMessage + 1 + mPos, mLen+tBufLen - mPos - 1, &encGuess);
          int rLen = oracle.encryptECBprefixed(realMessage + mPos, mLen+tBufLen-mPos, &encReal);
 
          if (memcmp(encGuess+bSize, encReal+bSize, bSize) == 0){
@@ -139,7 +140,6 @@ void breakECBbytes(encryptionOracle & oracle, unsigned char *message, int mLen, 
          free(encReal);
       }
    }
-   printf("%s\n", decMessage+tBufLen -1);
 }
 
 //Get the offset in case prefix is multiple blocks
@@ -177,12 +177,14 @@ int detectBlockSize(encryptionOracle & oracle) {
    oracle.encryptECBprefixed(buffer, 256, &change);
 
    int bEnd = 0;
-   for (int i = len; i >= initOffset; i-- ){
+   for (int i = len-1; i >= initOffset; i-- ){
       if ( base[i] == change[i] ) {
          bEnd = 0;
          break;
       }
    }
+   free(base);
+   free(change);
    return bEnd = initOffset;
 
 }

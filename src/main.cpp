@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
    auto s = profile_for("foo@bar.com");
    cout << s << endl;
 
-   auto tokens = parseToken(s);
+   auto tokens = parseToken(s, "&");
    for (auto p : tokens) {
       cout << p.first << " " << p.second << endl;
    }
@@ -48,17 +48,7 @@ int main(int argc, char** argv) {
    free(result);
    breakECBoracle(oracle, (unsigned char*)s.c_str(), (int) s.size());
 
-   int l = oracle.encryptCBCcomment("moo;admin=true;", 16, &result);
-
-   char * dec;
-   l = oracle.decryptCBC(result, l, &dec);
-   printf("%s\n", dec);
-   if (validPadding((unsigned char*)dec, l)) {
-      printf("good padding\n");
-   }
-
-   free(result);
-   free(dec);
+   cbcBitflip();
 
    return 0;
 }

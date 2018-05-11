@@ -40,4 +40,6 @@ private:
 int encryptionOracleStandalone(char* input, int len, char** output);
 void testECBCBC(int tries);
 
+void cbcBitflip();
+
 #endif
