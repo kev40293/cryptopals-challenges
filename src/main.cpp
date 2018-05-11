@@ -11,6 +11,9 @@
 #include "utils.h"
 #include "encOracle.h"
 #include "breakECB.h"
+#include <iostream>
+
+using namespace std;
 
 int main(int argc, char** argv) {
 
@@ -20,16 +23,24 @@ int main(int argc, char** argv) {
    unsigned char* key = (unsigned char*) "YELLOW SUBMARINE";
    decryptFileCBC(key, iv, argv[1]);
    */
-   const char * message = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
 
-   char * binMessage;
-   int mlen = b64tobin(message, strlen(message), &binMessage);
+   auto s = profile_for("foo@bar.com");
+   cout << s << endl;
 
-   //char input[256];
-   //memset (input, 'K', 256);
-   revealMessage(binMessage, mlen);
+   auto tokens = parseToken(s);
+   for (auto p : tokens) {
+      cout << p.first << " " << p.second << endl;
+   }
 
-   free(binMessage);
+   unsigned char key [16];
+   memset(key, 10, 16);
+   unsigned char iv [16];
+   memset(iv, 10, 16);
+
+   char * result;
+   int len = encryptAESCBC(key, iv, (const unsigned char*) s.c_str(), (int) s.size(), (unsigned char**) &result);
+
+   printBinHex(result, len);
 
    return 0;
 }
