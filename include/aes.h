@@ -1,5 +1,6 @@
+#ifndef AES_H
+#define AES_H
 
-extern "C" {
 int encryptAES(const unsigned char * key, const unsigned char * buffer, unsigned char *out );
 int decryptAES(const unsigned char * key, const unsigned char * buffer, unsigned char *out );
 
@@ -15,5 +16,8 @@ unsigned char * encryptECB(const unsigned char * key, const unsigned char* buffe
 void decryptFileECB(const char* key, char* filename);
 void decryptFileCBC(const unsigned char* key, const unsigned char* iv, char* filename);
 
+bool validPadding(const unsigned char* message, int len);
+
 void testOps(unsigned char* buffer);
-}
+
+#endif

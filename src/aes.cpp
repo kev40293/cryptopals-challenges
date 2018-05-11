@@ -455,19 +455,26 @@ void decryptFileECB(const char* key, char* filename) {
   }
   free(data);
 }
+
+bool validPadding(const unsigned char *message, int len) {
+   char pChar = message[len-1];
+   if (pChar > 16) return false;
+   for (const unsigned char * c = message+len-pChar; c < message+len; c++) {
+      if (*c != pChar) return false;
+   }
+   return true;
+}
+
 void decryptFileCBC(const unsigned char* key, const unsigned char* iv, char* filename) {
    int dataRead;
    char * data = base64readFile(filename, &dataRead);
    unsigned char * output;
    decryptAESCBC(key, iv, (unsigned char*)data, dataRead, &output);
-
-   char pChar = output[dataRead-1];
-   if (pChar > 16) printf("PADDING FUCKED UP\n");
-   for (unsigned char * c = output+dataRead-pChar; c < output+dataRead; c++) {
-      if (*c == pChar) *c = 0;
-      else printf("BAD PADDING ALERT\n");
+   if (!validPadding(output, dataRead)) {
+      printf("BAD PADDING ALERT\n");
    }
    printf("%s", output);
+   free(output);
 }
 
 void testOps(unsigned char* buffer) {
