@@ -16,29 +16,36 @@ char * fuzzInput(char *input, int length, int *newLen) {
    return newInput;
 }
 
-int encryptionOracle(char* input, int len, char** output) {
-   int r = rand();
-   printf("%d\n", r);
-   int alg = r % 2;
-   int length;
-   int key[4];
-   for (int i = 0; i< 4; i++) key[i] = rand();
+int encryptionOracle::encryptECB(char * input, int len, char** output ) {
+   int newLen;
+   char* fuzzedInput = fuzzInput(input, len, &newLen);
+   return encryptAESCBC((unsigned char*) m_key, (unsigned char*) m_iv, (unsigned char*)fuzzedInput, newLen, (unsigned char**) output);
+}
 
+int encryptionOracle::encryptRandom(char* input, int len, char** output) {
+   int r = rand();
+   int alg = r % 2;
+
+   int length;
    int newLen;
    char* fuzzedInput = fuzzInput(input, len, &newLen);
    switch(alg) {
       case 0:
          printf("Encrypting CBC\n");
-         int iv[4];
-         for (int i = 0; i< 4; i++) iv[i] = rand();
-         length = encryptAESCBC((unsigned char*) key, (unsigned char*) iv, (unsigned char*)fuzzedInput, newLen, (unsigned char**) output);
+         length = encryptAESCBC((unsigned char*) m_key, (unsigned char*) m_iv, (unsigned char*)fuzzedInput, newLen, (unsigned char**) output);
          break;
       case 1:
          printf("Encrypting ECB\n");
-         length = encryptAESECB((unsigned char*) key, (unsigned char*) fuzzedInput, newLen, (unsigned char**) output);
+         length = encryptAESECB((unsigned char*) m_key, (unsigned char*) fuzzedInput, newLen, (unsigned char**) output);
          break;
    }
    return length;
+}
+
+
+int encryptionOracleStandalone(char* input, int len, char** output) {
+   encryptionOracle oracle;
+   return oracle.encryptRandom(input, len, output);
 }
 
 void testECBCBC(int tries) {
@@ -50,7 +57,7 @@ void testECBCBC(int tries) {
 
    for (int i = 0; i < tries; i ++) {
       char *out;
-      int len =  encryptionOracle(test, 256, &out);
+      int len =  encryptionOracleStandalone(test, 256, &out);
 
       int nrep = maxRepeats (out, len);
       if (nrep > 2) printf("ECB detected\n");
