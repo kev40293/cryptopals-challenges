@@ -457,8 +457,8 @@ void decryptFileECB(const char* key, char* filename) {
 }
 
 bool validPadding(const unsigned char *message, int len) {
-   char pChar = message[len-1];
-   if (pChar > 16) return false;
+   unsigned char pChar = message[len-1];
+   if (pChar > 16 || pChar == 0) return false;
    for (const unsigned char * c = message+len-pChar; c < message+len; c++) {
       if (*c != pChar) return false;
    }

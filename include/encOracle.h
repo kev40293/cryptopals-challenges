@@ -25,8 +25,10 @@ public:
    int encryptECBfuzzed(const char* input, int len, char** output);
    int encryptECBprefixed(const char* input, int len, char** output);
    int encryptRandom(const char *input, int len, char** output);
+   int encryptCBC(const char* input, int len, char** output);
    int encryptCBCcomment(const char* input, int len, char** output);
    int decryptCBC(const char* input, int len, char** output);
+   const char* iv() { return m_iv; }
 private:
    char m_key[16];
    char m_iv[16];

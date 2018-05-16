@@ -11,11 +11,15 @@
 #include "utils.h"
 #include "encOracle.h"
 #include "breakECB.h"
+#include "padOracle.h"
 #include <iostream>
 
 using namespace std;
 
 int main(int argc, char** argv) {
+
+   padAttack();
+   return 0;
 
    /*
    unsigned char iv[16];
