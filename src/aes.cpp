@@ -411,6 +411,55 @@ int decryptAESCBC(const unsigned char * key, const unsigned char* iv, const unsi
    return inputLength;
 }
 
+inline void incrementCounter(unsigned char * counter) {
+   for (int i = 0; i < 8; i++){
+      if (counter[i] < 255) {
+         counter[i]++;
+         break;
+      }
+      else {
+         counter[i] = 0;
+      }
+   }
+}
+
+int encryptAESCTR(const unsigned char *key, const unsigned char* nonce, const unsigned char* buffer, int inputLength, unsigned char **output){
+   unsigned char counter[16];
+   memcpy(counter, nonce, 8); // set nonce in counter
+   memset(counter+8, 0, 8); // zero the counter
+
+   *output = (unsigned char*) malloc (sizeof(char)*inputLength);
+   int eLen = 0;
+   while (eLen < inputLength) {
+      unsigned char keyblock[16];
+      encryptAES(key, counter, keyblock);
+      int n = eLen + 16 <= inputLength ? 16: inputLength - eLen;
+      for (int i = 0; i < n; i++) (*output)[eLen + i] = keyblock[i] ^ buffer[eLen+i];
+      eLen += n;
+      incrementCounter(counter+8); // inc counter for next block
+   }
+
+   return eLen;
+}
+int decryptAESCTR(const unsigned char * key, const unsigned char* nonce, const unsigned char * buffer, int inputLength, unsigned char **output) {\
+   unsigned char counter[16];
+   memcpy(counter, nonce, 8); // set nonce in counter
+   memset(counter+8, 0, 8); // zero the counter
+
+   *output = (unsigned char*) malloc (sizeof(char)*inputLength);
+   int eLen = 0;
+   while (eLen < inputLength) {
+      unsigned char keyblock[16];
+      encryptAES(key, counter, keyblock);
+      int n = eLen + 16 <= inputLength ? 16 : inputLength - eLen;
+      for (int i = 0; i < n; i++) (*output)[eLen + i] = keyblock[i] ^ buffer[eLen+i];
+      eLen += n;
+      incrementCounter(counter+8); // inc counter for next block
+   }
+
+   return eLen;
+}
+
 void padBlock(char* block, int bSize, int inputLength) {
    char pChar = bSize - inputLength;
    for (int i = inputLength; i< bSize; i++) {

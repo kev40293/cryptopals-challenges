@@ -10,6 +10,9 @@ int decryptAESCBC(const unsigned char * key, const unsigned char* iv, const unsi
 int encryptAESECB(const unsigned char * key, const unsigned char * buffer, int inputLength, unsigned char **out);
 int decryptAESECB(const unsigned char * key, const unsigned char * buffer, int inputLength, unsigned char **out);
 
+int encryptAESCTR(const unsigned char *key, const unsigned char* nonce, const unsigned char* buffer, int inputLength, unsigned char **output);
+int decryptAESCTR(const unsigned char *key, const unsigned char* nonce, const unsigned char* buffer, int inputLength, unsigned char **output);
+
 void padBlock(char* block, int bSize, int inputLength);
 unsigned char * encryptECB(const unsigned char * key, const unsigned char* buffer, int len);
 

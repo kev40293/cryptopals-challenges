@@ -9,6 +9,7 @@ public:
       for (int i = 0; i < 4; i++){
          ((int*)m_key)[i] = rand();
          ((int*)m_iv)[i] = rand();
+         if (i < 2) ((int*)m_nonce)[i] = rand();
       }
       m_prefixLen = rand() % 16;
       printf("plen %d\n", m_prefixLen);
@@ -28,10 +29,13 @@ public:
    int encryptCBC(const char* input, int len, char** output);
    int encryptCBCcomment(const char* input, int len, char** output);
    int decryptCBC(const char* input, int len, char** output);
+   int encryptCTR(const char* input, int len, char** output);
+   int decryptCTR(const char* input, int len, char** output);
    const char* iv() { return m_iv; }
 private:
    char m_key[16];
    char m_iv[16];
+   char m_nonce[8];
 
    char * m_prefix;
    int m_prefixLen;
