@@ -1,5 +1,7 @@
+#if defined (USE_OPENSSL)
 #include <openssl/aes.h>
 #include <openssl/evp.h>
+#endif
 #include "aes.h"
 #include "b64.h"
 #include "utils.h"
@@ -467,6 +469,9 @@ void padBlock(char* block, int bSize, int inputLength) {
    }
 }
 
+#if !defined (USE_OPENSSL)
+unsigned char * encryptECB(const unsigned char * key, const unsigned char* buffer, int len) { return NULL; }
+#else
 unsigned char * encryptECB(const unsigned char * key, const unsigned char* buffer, int len) {
    const EVP_CIPHER *cipher = EVP_aes_128_ecb();
 
@@ -488,6 +493,7 @@ unsigned char * encryptECB(const unsigned char * key, const unsigned char* buffe
 
    return out;
 }
+#endif
 
 void decryptFileECB(const char* key, char* filename) {
    unsigned char  bytes[16];
